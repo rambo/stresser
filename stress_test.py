@@ -43,7 +43,11 @@ def getn(url, n):
             print "pid %d, time %f: got %s in %f seconds" % (p.pid, time.time(), url, took)
             sys.stdout.flush()
             perf = get_performance(driver)
-            print "pid %d, time %f: %s performance data: %s" % (p.pid, time.time(), url, perf)
+            ttfb = perf[u'responseStart'] - perf[u'fetchStart']
+            ttlb = perf[u'responseEnd'] - perf[u'fetchStart']
+            ttrdy = perf[u'loadEventEnd'] - perf[u'fetchStart']
+            rendertime = perf[u'loadEventEnd'] - perf[u'responseEnd']
+            print "pid %d, time %f: %s ttfb=%d ttlb=%d ttrdy=%d rendertime=%d" % (p.pid, time.time(), url, ttfb, ttlb, ttrdy, rendertime)
             b = time.time()
             fname = "%d_%s.png" % (p.pid,datetime.datetime.now().isoformat())
             took = time.time() - b
