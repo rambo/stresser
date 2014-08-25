@@ -41,6 +41,11 @@ def getn(url, n):
         print "pid %d, time %f: dumped %s in %f seconds" % (p.pid, time.time(), fname, took)
         sys.stdout.flush()
 
+    # Stupider wait (it sorta works but then I get errors from WebDriverWait...)
+    #time.sleep(15)
+    #fname = "%d_%s.png" % (p.pid,datetime.datetime.now().isoformat())
+    #driver.get_screenshot_as_file(fname)
+
     # Wait for slide change and grab second screenshot
     try:
         WebDriverWait(driver, 60).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.carousel-box .box-content:nth-child(2)')))
@@ -60,7 +65,7 @@ def getn(url, n):
 if __name__ == '__main__':
     jobs = []
     for x in range(5):
-        j = multiprocessing.Process(target=getn, args=('http://www.aalto.fi/fi/', 6))
+        j = multiprocessing.Process(target=getn, args=('http://www.aalto.fi/fi/', 2))
         jobs.append(j)
         j.start()
     
