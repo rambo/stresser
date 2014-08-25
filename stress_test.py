@@ -13,14 +13,20 @@ import sys,os
 REMOTE='http://10.211.55.14:4444/wd/hub'
 
 
+def get_performance(driver):
+    return driver.execute_script("""var performance = window.performance || {};
+var timings = performance.timing || {};
+return timings;""")
+
 def getn(url, n):
     import atexit
     p = multiprocessing.current_process()
     print 'Starting:', p.name, p.pid
     sys.stdout.flush()
+    driver = None
     try:
         driver = webdriver.Remote(
-                        desired_capabilities=DesiredCapabilities.CHROME,
+                        desired_capabilities=DesiredCapabilities.FIREFOX,
                         command_executor=REMOTE
         )
         # This doesn't seem to work with multiprocessing...
@@ -35,12 +41,14 @@ def getn(url, n):
             took = time.time() - b
             print "pid %d, time %f: got %s in %f seconds" % (p.pid, time.time(), url, took)
             sys.stdout.flush()
+            perf = get_performance(driver)
+            print "pid %d, time %f: %s performance data: %s" % (p.pid, time.time(), url, perf)
             b = time.time()
             fname = "%d_%s.png" % (p.pid,datetime.datetime.now().isoformat())
             took = time.time() - b
             driver.get_screenshot_as_file(fname)
-            print "pid %d, time %f: dumped %s in %f seconds" % (p.pid, time.time(), fname, took)
-            sys.stdout.flush()
+            #print "pid %d, time %f: dumped %s in %f seconds" % (p.pid, time.time(), fname, took)
+            #sys.stdout.flush()
     
         # Stupider wait (it sorta works (at least on FF, but then I get errors from WebDriverWait...)
         #time.sleep(15)
@@ -59,18 +67,19 @@ def getn(url, n):
             driver.get_screenshot_as_file(fname)
 
     except seleniumexceptions.WebDriverException, e:
-        print "pid %d, time %f: %s" % e
+        print "pid %d, time %f: EXCEPTION: %s" % (p.pid, time.time(), e)
         sys.stdout.flush()
     finally:
         print 'Done:', p.name, p.pid
         sys.stdout.flush()
-        driver.quit()
+        if driver:
+            driver.quit()
 
 
 if __name__ == '__main__':
     jobs = []
     for x in range(5):
-        j = multiprocessing.Process(target=getn, args=('http://www.aalto.fi/fi/', 2))
+        j = multiprocessing.Process(target=getn, args=('http://www.aalto.fi/fi/', 10))
         jobs.append(j)
         j.start()
     
