@@ -41,7 +41,7 @@ def getn(url, n):
         print "pid %d, time %f: dumped %s in %f seconds" % (p.pid, time.time(), fname, took)
         sys.stdout.flush()
 
-    # Stupider wait (it sorta works but then I get errors from WebDriverWait...)
+    # Stupider wait (it sorta works (at least on FF, but then I get errors from WebDriverWait...)
     #time.sleep(15)
     #fname = "%d_%s.png" % (p.pid,datetime.datetime.now().isoformat())
     #driver.get_screenshot_as_file(fname)
