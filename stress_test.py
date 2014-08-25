@@ -13,6 +13,7 @@ import sys,os
 REMOTE='http://10.211.55.14:4444/wd/hub'
 
 
+# from http://stackoverflow.com/questions/11360854/right-way-to-test-page-load-time-in-selenium
 def get_performance(driver):
     return driver.execute_script("""var performance = window.performance || {};
 var timings = performance.timing || {};
