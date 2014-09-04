@@ -3,22 +3,36 @@
 import zmq
 from zmq.eventloop import ioloop
 import zmqdecorators
+import zmq.utils.jsonapi as json
 
-SERVICE_NAME='rambo.stresser.mcp'
+SERVICE_NAME='fi.iki.rambo.stresser.mcp'
 
-class mcp(object):
-    def __init__(self, pub_wrapper):
-        self.zmq_pub_wraper = pub_wrapper
+class mcp(zmqdecorators.service):
+    workers = []
+
+    def __init__(self):
+        super(mcp, self).__init__(SERVICE_NAME)
         pass
 
     @zmqdecorators.signal(SERVICE_NAME)
     def testsignal(self):
+        print("Sending testsignal")
         pass
 
-    @zmqdecorators.method(SERVICE_NAME)
+    @zmqdecorators.method()
     def emit_testsignal(self, resp, *args):
         resp.send("ok") # Not required
         self.testsignal()
+
+    @zmqdecorators.method()
+    def register_worker(self, resp, identity, *args):
+        if not identity in self.workers:
+            self.workers.append(identity)
+            print("Worker %s registered, now have %d workers" % (identity, len(self.workers)))
+
+    @zmqdecorators.method()
+    def list_workers(self, resp, *args):
+        resp.send(json.dumps(self.workers))
 
     def run(self):
         ioloop.IOLoop.instance().start()
@@ -27,6 +41,5 @@ class mcp(object):
 
 if __name__ == "__main__":
     # We will need a slightly lower level access
-    pub_wrapper = zmqdecorators.server_tracker.get_by_name_or_create(SERVICE_NAME, zmq.PUB)
-    instance = mcp(pub_wrapper)
+    instance = mcp()
     instance.run()
