@@ -32,6 +32,7 @@ Then [chromedriver][chromedriverurl]
     cd /opt/chromedriver/
     wget http://chromedriver.storage.googleapis.com/2.10/chromedriver_linux64.zip
     unzip chromedriver_linux64.zip
+    chmod a+x -R /opt/chromedriver/
 
 [chromedriverurl]: http://chromedriver.storage.googleapis.com/index.html 
 
