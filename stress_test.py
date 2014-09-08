@@ -10,7 +10,7 @@ import time, datetime
 import multiprocessing
 import sys,os
 
-REMOTE='http://10.211.55.14:4444/wd/hub'
+REMOTE='http://127.0.0.1:4444/wd/hub'
 
 
 # from http://stackoverflow.com/questions/11360854/right-way-to-test-page-load-time-in-selenium

@@ -23,7 +23,8 @@ Then [Google Chrome][chromeppa] (Chromium chromedriver simply does not work)
     
 Then FF, Xvfb and some python utilities
 
-    sudo apt-get install firefox Xvfb python-selenium unzip wget
+    sudo apt-get install firefox Xvfb unzip wget python pip
+    pip install selenium
 
 Then [chromedriver][chromedriverurl]
 
@@ -33,6 +34,14 @@ Then [chromedriver][chromedriverurl]
     unzip chromedriver_linux64.zip
 
 [chromedriverurl]: http://chromedriver.storage.googleapis.com/index.html 
+
+And finally Selenium itself
+
+    mkdir -p /opt/selenium/server/
+    cd /opt/selenium/server/
+    wget http://selenium-release.storage.googleapis.com/2.42/selenium-server-standalone-2.42.2.jar
+    ln -s selenium-server-standalone-2.42.2.jar selenium-server-standalone-current.jar
+
 
 ## Start Selenium
 
