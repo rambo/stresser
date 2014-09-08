@@ -6,15 +6,17 @@ import zmqdecorators
 import zmq.utils.jsonapi as json
 
 SERVICE_NAME='fi.iki.rambo.stresser.mcp'
+METHODS_PORT=7070
+SIGNALS_PORT=7071
 
 class mcp(zmqdecorators.service):
     workers = []
 
     def __init__(self):
-        super(mcp, self).__init__(SERVICE_NAME)
+        super(mcp, self).__init__(SERVICE_NAME, service_port=METHODS_PORT)
         pass
 
-    @zmqdecorators.signal(SERVICE_NAME)
+    @zmqdecorators.signal(SERVICE_NAME, SIGNALS_PORT)
     def testsignal(self):
         print("Sending testsignal")
         pass
