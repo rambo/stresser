@@ -4,10 +4,10 @@ from zmq.eventloop import ioloop
 import zmqdecorators
 import zmq.utils.jsonapi as json
 
-# Bonjour resolving
-METHODS_SERVICE='fi.iki.rambo.stresser.mcp'
 # Hardcode IP
 METHODS_SERVICE=('127.0.0.1', 7070)
+# Bonjour resolving
+METHODS_SERVICE='fi.iki.rambo.stresser.mcp'
 
 class worker(object):
     def __init__(self, client_wrapper):
@@ -25,6 +25,9 @@ class worker(object):
 
 if __name__ == "__main__":
     import sys,os
+    # If started with an argument it is the IP for MCP
+    if len(sys.argv) == 2:
+        METHODS_SERVICE = (sys.argv[1], 7070)
     # We will need a slightly lower level access
     client_wrapper = zmqdecorators.zmq_bonjour_connect_wrapper(zmq.DEALER, METHODS_SERVICE)
     print("Got identity %s" % client_wrapper.socket.getsockopt(zmq.IDENTITY))
