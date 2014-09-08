@@ -10,8 +10,9 @@ import time, datetime
 import multiprocessing
 import sys,os
 
+#REMOTE='http://10.211.55.14:4444/wd/hub'
 REMOTE='http://127.0.0.1:4444/wd/hub'
-
+#driver = webdriver.Remote(desired_capabilities=DesiredCapabilities.FIREFOX, command_executor=REMOTE)
 
 # from http://stackoverflow.com/questions/11360854/right-way-to-test-page-load-time-in-selenium
 def get_performance(driver):

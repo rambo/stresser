@@ -6,11 +6,11 @@ Random selenium related scripts for testing misc things
 
 All of this supposes Ubuntu LTS (Trusty).
 
-First Oracle Java, 6 should be ok.
+First Oracle Java, 7 should be ok.
 
     sudo add-apt-repository ppa:webupd8team/java
     sudo apt-get update
-    sudo apt-get install oracle-java6-installer
+    sudo apt-get install oracle-java7-installer oracle-java7-set-default
 
 Then [Google Chrome][chromeppa] (Chromium chromedriver simply does not work)
 
@@ -23,7 +23,7 @@ Then [Google Chrome][chromeppa] (Chromium chromedriver simply does not work)
     
 Then FF, Xvfb and some python utilities
 
-    sudo apt-get install firefox Xvfb unzip wget python pip
+    sudo apt-get install firefox firefox-locale-en Xvfb unzip wget python pip dbus-x11
     pip install selenium
 
 Then [chromedriver][chromedriverurl]
@@ -45,4 +45,6 @@ And finally Selenium itself
 
 ## Start Selenium
 
-Use the start_headless.sh script from the bin/ directory.
+Use the start_headless.sh script from the bin/ directory as normal user (not root!)
+
+    su -c bin/start_headless.sh selenium
