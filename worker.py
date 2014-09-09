@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Worker"""
 import zmq
 from zmq.eventloop import ioloop
