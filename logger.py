@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys,os
 from exceptions import NotImplementedError,RuntimeError
 import sqlite3
 # Decimal recipe from http://stackoverflow.com/questions/6319409/how-to-convert-python-decimal-to-sqlite-numeric
@@ -28,7 +27,7 @@ SIGNALS_PORT=7081
 class logger(zmqdecorators.service):
     """Logs our status' etc to a sqlite database"""
     def __init__(self, logfilename):
-        super(mcp, self).__init__(SERVICE_NAME, service_port=METHODS_PORT)
+        super(logger, self).__init__(SERVICE_NAME, service_port=METHODS_PORT)
 
         call_init_db = False
         if not os.path.exists(logfilename):
@@ -42,17 +41,23 @@ class logger(zmqdecorators.service):
         """Initializes the database schema"""
         # The timestamps on these tables are basically denormalized just in case we wish to do optimized time based searches in them.
         # TODO: Rethink the schema
-        #self.cursor.execute("CREATE TABLE status (sessionid INTEGER NOT NULL, time TIMESTAMP DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), responsetime INTEGER, ioerror INTEGER, httpstatus INTEGER, contentstatus BOOLEAN, FOREIGN KEY(sessionid) REFERENCES sessions(id));")
+        self.cursor.execute("CREATE TABLE log (clientid TEXT NOT NULL, time TIMESTAMP DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), url TEXT, action TEXT, httpstatus INTEGER, ttfb INTEGER, ttlb INTEGER, ttrdy INTEGER, perfjson TEXT);")
         self.connection.commit()
 
     @zmqdecorators.method()
-    def log(self, resp, *args):
-        pass
+    def log(self, resp, time, url, action, httpstatus, ttfb, ttlb, ttrdy, perfjson):
+        self.cursor.execute("INSERT INTO log (clientid, time, url, action, httpstatus, ttfb, ttlb, ttrdy, perfjson) VALUES (?,?,?,?,?,?,?,?,?);", (resp.client_id, time, url, action, httpstatus, ttfb, ttlb, ttrdy, perfjson))
+        self.connection.commit()
 
     def run(self):
         ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
-    instance = logger()
+    import sys, os, os.path
+    if len(sys.argv) < 2:
+        logfile = "%s-%s.db" % (os.path.splitext(os.path.basename(sys.argv[0]))[0], datetime.datetime.now().strftime("%Y%m%d_%H%M"))
+    else:
+        logfile = sys.argv[1]
+    instance = logger(logfile)
     instance.run()
 
