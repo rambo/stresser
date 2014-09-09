@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """The Master Control Program"""
 import zmq
-from zmq.eventloop import ioloop
+from zmq.eventloop import ioloop as ioloop_mod
 import zmqdecorators
 import zmq.utils.jsonapi as json
 
@@ -15,6 +15,11 @@ class mcp(zmqdecorators.service):
 
     def __init__(self):
         super(mcp, self).__init__(SERVICE_NAME, service_port=METHODS_PORT)
+
+
+        #self.pcb = ioloop_mod.PeriodicCallback(self.testsignal, 100)
+        #self.pcb.start()
+
         pass
 
     @zmqdecorators.signal(SERVICE_NAME, SIGNALS_PORT)
@@ -38,8 +43,8 @@ class mcp(zmqdecorators.service):
         resp.send(json.dumps(self.workers))
 
     def run(self):
-        ioloop.IOLoop.instance().start()
-
+        # Anything that needs to be handled *just* before we start the IOLopp, add it here
+        super(mcp, self).run()
 
 
 if __name__ == "__main__":
