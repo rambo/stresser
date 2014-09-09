@@ -49,8 +49,7 @@ class logger(zmqdecorators.service):
         self.cursor.execute("INSERT INTO log (clientid, time, url, action, httpstatus, ttfb, ttlb, ttrdy, walltime, perfjson) VALUES (?,?,?,?,?,?,?,?,?,?);", (resp.client_id, timestamp, url, action, int(httpstatus), int(ttfb), int(ttlb), int(ttrdy), int(walltime), perfjson))
         self.connection.commit()
 
-    def run(self):
-        ioloop.IOLoop.instance().start()
+
 
 if __name__ == "__main__":
     import sys, os, os.path
