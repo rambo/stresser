@@ -32,11 +32,16 @@ class worker(zmqdecorators.client):
         self.register_to_mcp()
 
         zmqdecorators.subscribe_topic(MCP_SIGNALS_SERVICE, 'testsignal', self.testsignal_callback)
-        self.mcp_wrapper.call('emit_testsignal')
+        self.pcb = ioloop_mod.PeriodicCallback(self.request_testsignal, 500)
+        self.pcb.start()
 
         zmqdecorators.subscribe_topic(MCP_SIGNALS_SERVICE, 'EVERYONE', self.mcp_command_callback)
         zmqdecorators.subscribe_topic(MCP_SIGNALS_SERVICE, self.identity, self.mcp_command_callback)
         self.log('N/A', 'STARTED', 0,0,0,0,0,'{}')
+
+    def request_testsignal(self):
+        print("Requesting testsignal")
+        self.mcp_wrapper.call('emit_testsignal')
 
     def testsignal_callback(self, *args):
         print "Got testsignal: %s" % repr(args)

@@ -21,14 +21,14 @@ class mcp(zmqdecorators.service):
         self.pcb.start()
 
     @zmqdecorators.signal(SIGNALS_SERVICE_NAME, SIGNALS_PORT)
-    def testsignal(self):
+    def testsignal(self, *args):
         print("Sending testsignal")
         pass
 
     @zmqdecorators.method()
     def emit_testsignal(self, resp, *args):
         resp.send("ok") # Not required
-        self.testsignal()
+        self.testsignal("by request")
 
     @zmqdecorators.method()
     def register_worker(self, resp, identity, *args):
