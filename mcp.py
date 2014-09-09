@@ -3,6 +3,7 @@
 """The Master Control Program"""
 import zmq
 from zmq.eventloop import ioloop
+ioloop.install()
 import zmqdecorators
 import zmq.utils.jsonapi as json
 

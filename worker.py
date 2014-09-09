@@ -3,6 +3,7 @@
 """Worker"""
 import zmq
 from zmq.eventloop import ioloop
+ioloop.install()
 import zmqdecorators
 import zmq.utils.jsonapi as json
 import datetime
@@ -25,7 +26,7 @@ class worker(object):
         self.identity = self.mcp_wrapper.identity
 
         self.register_to_mcp()
-        self.log('NA', 'STARTED', 200, 0,0,0, '{}')
+        self.log('N/A', 'STARTED', 0,0,0,0,0,'{}')
 
     def register_to_mcp(self):
         self.mcp_wrapper.call('register_worker', self.identity)
@@ -37,6 +38,8 @@ class worker(object):
 
     def run(self):
         ioloop.IOLoop.instance().start()
+
+
 
 if __name__ == "__main__":
     import sys,os
