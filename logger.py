@@ -19,7 +19,7 @@ from zmq.eventloop import ioloop
 import zmqdecorators
 import zmq.utils.jsonapi as json
 
-SERVICE_NAME='fi.iki.rambo.stresser.mcp'
+SERVICE_NAME='fi.iki.rambo.stresser.logger'
 METHODS_PORT=7080
 SIGNALS_PORT=7081
 
@@ -45,8 +45,8 @@ class logger(zmqdecorators.service):
         self.connection.commit()
 
     @zmqdecorators.method()
-    def log(self, resp, time, url, action, httpstatus, ttfb, ttlb, ttrdy, perfjson):
-        self.cursor.execute("INSERT INTO log (clientid, time, url, action, httpstatus, ttfb, ttlb, ttrdy, perfjson) VALUES (?,?,?,?,?,?,?,?,?);", (resp.client_id, time, url, action, httpstatus, ttfb, ttlb, ttrdy, perfjson))
+    def log(self, resp, timestamp, url, action, httpstatus, ttfb, ttlb, ttrdy, perfjson):
+        self.cursor.execute("INSERT INTO log (clientid, time, url, action, httpstatus, ttfb, ttlb, ttrdy, perfjson) VALUES (?,?,?,?,?,?,?,?,?);", (resp.client_id, timestamp, url, action, int(httpstatus), int(ttfb), int(ttlb), int(ttrdy), perfjson))
         self.connection.commit()
 
     def run(self):
