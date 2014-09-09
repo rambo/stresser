@@ -7,7 +7,7 @@ import zmqdecorators
 import zmq.utils.jsonapi as json
 
 METHODS_SERVICE_NAME='fi.iki.rambo.stresser.mcp'
-SIGNALS_SERVICE_NAME='fi.iki.rambo.stresser.mcp.commands'
+SIGNALS_SERVICE_NAME='fi.iki.rambo.stresser.mcp'
 METHODS_PORT=7070
 SIGNALS_PORT=7071
 

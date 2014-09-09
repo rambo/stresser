@@ -15,7 +15,7 @@ MCP_METHODS_SERVICE='fi.iki.rambo.stresser.mcp'
 # Hardcode IP
 MCP_SIGNALS_SERVICE=('127.0.0.1', 7071)
 # Bonjour resolving
-MCP_SIGNALS_SERVICE='fi.iki.rambo.stresser.mcp.commands'
+MCP_SIGNALS_SERVICE='fi.iki.rambo.stresser.mcp'
 # Hardcode IP
 LOG_METHODS_SERVICE=('127.0.0.1', 7080)
 # Bonjour resolving
