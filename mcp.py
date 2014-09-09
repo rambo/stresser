@@ -16,11 +16,8 @@ class mcp(zmqdecorators.service):
     def __init__(self):
         super(mcp, self).__init__(SERVICE_NAME, service_port=METHODS_PORT)
 
-
-        #self.pcb = ioloop_mod.PeriodicCallback(self.testsignal, 100)
-        #self.pcb.start()
-
-        pass
+        self.pcb = ioloop_mod.PeriodicCallback(self.testsignal, 1000)
+        self.pcb.start()
 
     @zmqdecorators.signal(SERVICE_NAME, SIGNALS_PORT)
     def testsignal(self):

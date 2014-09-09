@@ -30,14 +30,19 @@ class worker(zmqdecorators.client):
         self.identity = self.mcp_wrapper.identity
 
         self.register_to_mcp()
+
+        zmqdecorators.subscribe_topic(MCP_SIGNALS_SERVICE, 'testsignal', self.testsignal_callback)
         self.mcp_wrapper.call('emit_testsignal')
+
         zmqdecorators.subscribe_topic(MCP_SIGNALS_SERVICE, 'EVERYONE', self.mcp_command_callback)
         zmqdecorators.subscribe_topic(MCP_SIGNALS_SERVICE, self.identity, self.mcp_command_callback)
         self.log('N/A', 'STARTED', 0,0,0,0,0,'{}')
 
+    def testsignal_callback(self, *args):
+        print "Got testsignal: %s" % repr(args)
+
     def mcp_command_callback(self, *args):
         print "Got command: %s" % repr(args)
-        pass
 
     def register_to_mcp(self):
         self.mcp_wrapper.call('register_worker', self.identity)
