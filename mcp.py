@@ -6,7 +6,8 @@ from zmq.eventloop import ioloop as ioloop_mod
 import zmqdecorators
 import zmq.utils.jsonapi as json
 
-SERVICE_NAME='fi.iki.rambo.stresser.mcp'
+METHODS_SERVICE_NAME='fi.iki.rambo.stresser.mcp'
+SIGNALS_SERVICE_NAME='fi.iki.rambo.stresser.mcp.commands'
 METHODS_PORT=7070
 SIGNALS_PORT=7071
 
@@ -14,12 +15,12 @@ class mcp(zmqdecorators.service):
     workers = []
 
     def __init__(self):
-        super(mcp, self).__init__(SERVICE_NAME, service_port=METHODS_PORT)
+        super(mcp, self).__init__(METHODS_SERVICE_NAME, service_port=METHODS_PORT)
 
         self.pcb = ioloop_mod.PeriodicCallback(self.testsignal, 1000)
         self.pcb.start()
 
-    @zmqdecorators.signal(SERVICE_NAME, SIGNALS_PORT)
+    @zmqdecorators.signal(SIGNALS_SERVICE_NAME, SIGNALS_PORT)
     def testsignal(self):
         print("Sending testsignal")
         pass
