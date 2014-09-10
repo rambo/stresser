@@ -21,7 +21,7 @@ CAPS = DesiredCapabilities.FIREFOX
 
 # Bonjour resolving
 MCP_METHODS_SERVICE = 'fi.iki.rambo.stresser.mcp'
-MCP_SIGNALS_SERVICE = 'fi.iki.rambo.stresser.mcp.commands'
+MCP_SIGNALS_SERVICE = 'fi.iki.rambo.stresser.mcp.signals'
 LOG_METHODS_SERVICE = 'fi.iki.rambo.stresser.logger'
 
 class worker(zmqdecorators.client):

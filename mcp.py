@@ -10,7 +10,7 @@ import time
 DEAD_WORKER_TIMEOUT = 15 # Seconds
 
 METHODS_SERVICE_NAME = 'fi.iki.rambo.stresser.mcp'
-SIGNALS_SERVICE_NAME = 'fi.iki.rambo.stresser.mcp.commands'
+SIGNALS_SERVICE_NAME = 'fi.iki.rambo.stresser.mcp.signals'
 METHODS_PORT = 7070
 SIGNALS_PORT = 7071
 
