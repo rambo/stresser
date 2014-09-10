@@ -52,8 +52,19 @@ class worker(zmqdecorators.client):
         self.heartbeat_pcb = ioloop_mod.PeriodicCallback(self.heartbeat_to_mcp, 1000)
         self.heartbeat_pcb.start()
 
+        # Keep the webdriver connection alive
+        self.wdkeepalive_pcb = ioloop_mod.PeriodicCallback(self._webdriver_keepalive, 5000)
+        self.wdkeepalive_pcb.start()
+
         # Finally log us as a started worker
-        self.log('N/A', 'STARTED', 0,0,0,0,0,'{}')
+        self.log('N/A', 'STARTED', '{}', 0,0,0,0,0,'{}')
+
+
+    def _webdriver_keepalive(self):
+        """Just call driver.title to keep the webdriver connection alive"""
+        with self.webdriver_lock:
+            self.webdriver.title
+
 
     def page_changed(self):
         """Checks if the DOM(?) has changed since last check"""
@@ -77,11 +88,13 @@ class worker(zmqdecorators.client):
                 cmdmethod = getattr(self.wd_last_return, command)
             self.wd_last_return = cmdmethod(*args)
             walltime = time.time() - start
+            walltime_ms = int(walltime*1000)
             # Log results if page was change or command was in certain list
             if (   self.page_changed()
                 or command in ('wd:get', 'click')):
                 # For HTTP status codes we need a proxy that will give that info to us (like browsermob-proxy or something)
-                self.log(self.webdriver.current_url, logaction, 0, walltime, *self.get_performance())
+                # use milliseconds as walltime unit too
+                self.log(self.webdriver.current_url, logaction, args_json, 0, walltime_ms, *self.get_performance()) 
 
     def register_to_mcp(self):
         self.mcp_wrapper.call('register_worker', self.identity)
@@ -89,10 +102,10 @@ class worker(zmqdecorators.client):
     def heartbeat_to_mcp(self):
         self.mcp_wrapper.call('worker_heatbeat', self.identity)
 
-    def log(self, url, action, httpstatus, walltime, ttfb, ttlb, ttrdy, perfjson, timestamp=None):
+    def log(self, url, action, args_json, httpstatus, walltime, ttfb, ttlb, ttrdy, perfjson, timestamp=None):
         if not timestamp:
             timestamp = datetime.datetime.now()
-        self.log_wrapper.call('log', timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], str(url), str(action), str(httpstatus), str(walltime), str(ttfb), str(ttlb), str(ttrdy), str(perfjson))
+        self.log_wrapper.call('log', timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], str(url), str(action), str(args_json), str(httpstatus), str(walltime), str(ttfb), str(ttlb), str(ttrdy), str(perfjson))
 
     # from http://stackoverflow.com/questions/11360854/right-way-to-test-page-load-time-in-selenium
     def get_performance(self):

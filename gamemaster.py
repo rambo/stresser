@@ -32,7 +32,7 @@ class workerproxy(object):
 
     def cmd(self, cmd, *args):
         """The command arguments must be JSON encoded to be transferred via ZMQ"""
-        print("Calling self.mcp_wrapper.call('send_command', %s, %s, %s)" % (self.identity, cmd, json.dumps(*args)))
+        #print("Calling self.mcp_wrapper.call('send_command', %s, %s, %s)" % (self.identity, cmd, json.dumps(*args)))
         zmqdecorators.call_sync(self.mcp_wrapper, 'send_command', self.identity, cmd, json.dumps(args))
 
 
@@ -54,5 +54,5 @@ if __name__ == "__main__":
     e = gm.get_proxy('EVERYONE')
     print("""e = gm.get_proxy('EVERYONE') # proxy for all workers created """)
     print("""create new proxies: p = gm.get_proxy('worker_id') """)
-    print("""try: e.cmd('wd:get', 'http://www.aalto.fi/')""")
+    print("""try: e.cmd('wd:get', 'http://www.aalto.fi/') # Note this, returns as soon as MCP has queued the message to workers""")
 
