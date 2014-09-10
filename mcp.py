@@ -44,12 +44,15 @@ class mcp(zmqdecorators.service):
 
     def _send_command(self, identity, command, *args):
         """Send command to given worker (or 'EVERYONE'), uses PUB socket. This is the actual implementation (separate from the RPC method so we can call it directly as needed)"""
+        #print("Sending command %s to %s (args: %s)" % (command, identity, repr(args)))
         self.signals_stream.send_multipart([identity, command] + list(args))
 
     @zmqdecorators.method()
     def send_command(self, resp, identity, command, *args):
-        """Send command to given worker (or 'EVERYONE'), uses PUB socket. This is what gamemester calls to delegate commands, the final argument must be JSON encoded argument list for the function"""
+        """Send command to given worker (or 'EVERYONE'), uses PUB socket. This is what gamemester calls to delegate commands, the final argument must be JSON encoded argument list for the command method"""
+        #print("send_command called by %s" % resp.client_id)
         self._send_command(identity, command, *args)
+        resp.send("sent")
 
     @zmqdecorators.signal(SIGNALS_SERVICE_NAME, SIGNALS_PORT)
     def worker_reaped(self, identity):
@@ -78,7 +81,7 @@ class mcp(zmqdecorators.service):
             self.worker_added(identity)
         else:
             self.workers[identity] = time.time()
-            print("Worker %s is alive" % identity)
+            #print("Worker %s is alive" % identity)
 
     @zmqdecorators.method()
     def list_workers(self, resp, *args):
