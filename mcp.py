@@ -30,13 +30,6 @@ class mcp(zmqdecorators.service):
         self.reaper_pcb = ioloop_mod.PeriodicCallback(self.reap_dead_workers, 1000)
         self.reaper_pcb.start()
 
-
-        test_pcb = ioloop_mod.PeriodicCallback(self.send_test_command, 500)
-        test_pcb.start()
-
-    def send_test_command(self):
-        self._send_command('EVERYONE', 'test', 'Lorem', 'ipsum', 'dolet')
-
     def reap_dead_workers(self):
         now = time.time()
         reaped = False
