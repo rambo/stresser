@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """The Master Control Program"""
+from __future__ import with_statement
 import zmq
 from zmq.eventloop import ioloop as ioloop_mod
 import zmqdecorators
 import zmq.utils.jsonapi as json
 import time
+
 
 DEAD_WORKER_TIMEOUT = 15 # Seconds
 
@@ -53,7 +55,7 @@ class mcp(zmqdecorators.service):
 
     @zmqdecorators.method()
     def send_command(self, resp, identity, command, *args):
-        """Send command to given worker (or 'EVERYONE'), uses PUB socket. This is what gamemester calls to delegate commands"""
+        """Send command to given worker (or 'EVERYONE'), uses PUB socket. This is what gamemester calls to delegate commands, the final argument must be JSON encoded argument list for the function"""
         self._send_command(identity, command, *args)
 
     @zmqdecorators.signal(SIGNALS_SERVICE_NAME, SIGNALS_PORT)

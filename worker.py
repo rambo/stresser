@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Worker"""
+from __future__ import with_statement
 import zmq
 from zmq.eventloop import ioloop as ioloop_mod
 import zmqdecorators
@@ -14,6 +15,7 @@ from selenium.webdriver.common.by import By
 import selenium.common.exceptions as seleniumexceptions
 from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
 from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
+from threading import Lock
 
 
 REMOTE = 'http://127.0.0.1:4444/wd/hub'
@@ -26,6 +28,7 @@ LOG_METHODS_SERVICE = 'fi.iki.rambo.stresser.logger'
 
 class worker(zmqdecorators.client):
     webdriver = None
+    previus_source = None
 
     def __init__(self, mcp_wrapper, log_wrapper):
         super(worker, self).__init__()
@@ -33,6 +36,7 @@ class worker(zmqdecorators.client):
         self.log_wrapper = log_wrapper
         self.uuid = self.mcp_wrapper.uuid
         self.identity = self.mcp_wrapper.identity
+        self.webdriver_lock = Lock()
 
         print("Connecting to Webdriver %s" % REMOTE)
         self.webdriver = webdriver.Remote(desired_capabilities=CAPS, command_executor=REMOTE)
@@ -51,8 +55,33 @@ class worker(zmqdecorators.client):
         # Finally log us as a started worker
         self.log('N/A', 'STARTED', 0,0,0,0,0,'{}')
 
-    def mcp_command_callback(self, *args):
-        print "Got command: %s" % repr(args)
+    def page_changed(self):
+        """Checks if the DOM(?) has changed since last check"""
+        new_source = self.webdriver.page_source
+        ret = True
+        if self.previus_source == new_source:
+            ret = False
+        self.previus_source = new_source
+        return ret
+
+    def mcp_command_callback(self, identity, command, args_json="[]"):
+        args = jsonapi.loads(args_json)
+        print "Got command: %s(%s)" % (command, repr(args))
+        start = time.time()
+        with self.webdriver_lock:
+            if command[0:3] == 'wd:':
+                logaction = command
+                cmdmethod = self.webdriver.getattr(command[3:])
+            else:
+                logaction = "%s:%s" % (self.wd_last_return.id, command)
+                cmdmethod = self.wd_last_return.getattr(command)
+            self.wd_last_return = cmdmethod(*args)
+            walltime = time.time() - start
+            # Log results if page was change or command was in certain list
+            if (   self.page_changed()
+                or command in ('wd:get', 'click')):
+                # For HTTP status codes we need a proxy that will give that info to us (like browsermob-proxy or something)
+                self.log(self.webdriver.current_url, logaction, 0, walltime, *self.get_performance())
 
     def register_to_mcp(self):
         self.mcp_wrapper.call('register_worker', self.identity)
