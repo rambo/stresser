@@ -3,10 +3,10 @@
 """Worker"""
 from __future__ import with_statement
 import zmq
+import zmq.utils.jsonapi as json
 from zmq.eventloop import ioloop as ioloop_mod
 import zmqdecorators
-import zmq.utils.jsonapi as json
-import datetime
+import time, datetime
 import atexit
 import signal as posixsignal
 from selenium import webdriver
@@ -64,17 +64,17 @@ class worker(zmqdecorators.client):
         self.previus_source = new_source
         return ret
 
-    def mcp_command_callback(self, identity, command, args_json="[]"):
-        args = jsonapi.loads(args_json)
+    def mcp_command_callback(self, command, args_json="[]"):
+        args = json.loads(args_json)
         print "Got command: %s(%s)" % (command, repr(args))
         start = time.time()
         with self.webdriver_lock:
             if command[0:3] == 'wd:':
                 logaction = command
-                cmdmethod = self.webdriver.getattr(command[3:])
+                cmdmethod = getattr(self.webdriver, command[3:])
             else:
                 logaction = "%s:%s" % (self.wd_last_return.id, command)
-                cmdmethod = self.wd_last_return.getattr(command)
+                cmdmethod = getattr(self.wd_last_return, command)
             self.wd_last_return = cmdmethod(*args)
             walltime = time.time() - start
             # Log results if page was change or command was in certain list
@@ -92,7 +92,7 @@ class worker(zmqdecorators.client):
     def log(self, url, action, httpstatus, walltime, ttfb, ttlb, ttrdy, perfjson, timestamp=None):
         if not timestamp:
             timestamp = datetime.datetime.now()
-        self.log_wrapper.call('log', timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], url, action, str(httpstatus), str(walltime), str(ttfb), str(ttlb), str(ttrdy), perfjson)
+        self.log_wrapper.call('log', timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], str(url), str(action), str(httpstatus), str(walltime), str(ttfb), str(ttlb), str(ttrdy), str(perfjson))
 
     # from http://stackoverflow.com/questions/11360854/right-way-to-test-page-load-time-in-selenium
     def get_performance(self):
