@@ -16,7 +16,7 @@ import selenium.common.exceptions as seleniumexceptions
 from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
 from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
 from threading import Lock
-
+from exceptions import RuntimeError,KeyboardInterrupt,AttributeError
 
 REMOTE = 'http://127.0.0.1:4444/wd/hub'
 CAPS = DesiredCapabilities.FIREFOX
@@ -28,17 +28,24 @@ class worker(zmqdecorators.client):
     webdriver = None
     previus_source = None
 
-    def __init__(self, mcp_wrapper, log_wrapper):
+    def __init__(self):
         super(worker, self).__init__()
-        self.mcp_wrapper = mcp_wrapper
-        self.log_wrapper = log_wrapper
+
+        print("Connecting to MCP")
+        self.mcp_wrapper = zmqdecorators.zmq_bonjour_connect_wrapper(zmq.DEALER, MCP_METHODS_SERVICE)
+        print("Got MCP identity %s" % self.mcp_wrapper.socket.getsockopt(zmq.IDENTITY))
+        print("Connecting to logger")
+        self.log_wrapper = zmqdecorators.zmq_bonjour_connect_wrapper(zmq.DEALER, LOG_METHODS_SERVICE, identity=self.mcp_wrapper.identity)
+        print("Got LOG identity %s" % self.log_wrapper.socket.getsockopt(zmq.IDENTITY))
+
         self.uuid = self.mcp_wrapper.uuid
         self.identity = self.mcp_wrapper.identity
         self.webdriver_lock = Lock()
 
         print("Connecting to Webdriver %s" % REMOTE)
         self.webdriver = webdriver.Remote(desired_capabilities=CAPS, command_executor=REMOTE)
-        atexit.register(self.webdriver.quit)
+        # This does not work for subprocesses it seems
+        # atexit.register(self.webdriver.quit)
 
         # Subscribe to the command PUB channels
         zmqdecorators.subscribe_topic(MCP_SIGNALS_SERVICE, 'EVERYONE', self.mcp_command_callback)
@@ -73,9 +80,21 @@ class worker(zmqdecorators.client):
         self.previus_source = new_source
         return ret
 
+    def DIE(self):
+        """Kill a worker remotely"""
+        print("quitting...")
+        self.quit()
+
     def mcp_command_callback(self, command, args_json="[]"):
         args = json.loads(args_json)
         print "Got command: %s(*%s)" % (command, repr(args))
+        try:
+            # Check if we have a special handler for this command
+            mymethod = getattr(self, command)
+            return mymethod(*args)
+        except AttributeError:
+            pass
+        # Otherwise try to be smart
         start = time.time()
         with self.webdriver_lock:
             if command[0:3] == 'wd:':
@@ -115,9 +134,8 @@ class worker(zmqdecorators.client):
         return (ttfb, ttlb, ttrdy, json.dumps(perf))
 
     def cleanup(self):
-# Atexit will take care of this
-#        if self.webdriver:
-#            self.webdriver.quit()
+        if self.webdriver:
+            self.webdriver.quit()
         pass
 
     def run(self):
@@ -139,13 +157,7 @@ if __name__ == "__main__":
         # Alternate IP for the Selenium hub
         REMOTE='http://%s:4444/wd/hub' % sys.argv[2]
 
-    print("Connecting to MCP")
-    mcp_wrapper = zmqdecorators.zmq_bonjour_connect_wrapper(zmq.DEALER, MCP_METHODS_SERVICE)
-    print("Got MCP identity %s" % mcp_wrapper.socket.getsockopt(zmq.IDENTITY))
-    print("Connecting to logger")
-    log_wrapper = zmqdecorators.zmq_bonjour_connect_wrapper(zmq.DEALER, LOG_METHODS_SERVICE, identity=mcp_wrapper.identity)
-    print("Got LOG identity %s" % log_wrapper.socket.getsockopt(zmq.IDENTITY))
-    instance = worker(mcp_wrapper, log_wrapper)
+    instance = worker()
     print("Starting eventloop")
     instance.run()
 
