@@ -47,12 +47,12 @@ if __name__ == "__main__":
     # Handle the (optional) command line arguments
     if len(sys.argv) >= 3:
         # Manual IP & port config
-        worker.MCP_METHODS_SERVICE = (sys.argv[1], MCP_METHODS_PORT)
-        worker.MCP_SIGNALS_SERVICE = (sys.argv[1], MCP_SIGNALS_PORT)
-        worker.LOG_METHODS_SERVICE = (sys.argv[1], LOG_METHODS_PORT)
+        worker.MCP_METHODS_SERVICE = (sys.argv[2], MCP_METHODS_PORT)
+        worker.MCP_SIGNALS_SERVICE = (sys.argv[2], MCP_SIGNALS_PORT)
+        worker.LOG_METHODS_SERVICE = (sys.argv[2], LOG_METHODS_PORT)
     if len(sys.argv) >= 4:
         # Alternate IP for the Selenium hub
-        worker.REMOTE='http://%s:4444/wd/hub' % sys.argv[2]
+        worker.REMOTE='http://%s:4444/wd/hub' % sys.argv[3]
 
     pool = workerpool()
     pool.startn(int(sys.argv[1]))
