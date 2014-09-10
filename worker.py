@@ -96,6 +96,7 @@ class worker(zmqdecorators.client):
             pass
         # Otherwise try to be smart
         start = time.time()
+        # Strictly speaking this is not really neccessary, the ioloop will give us only one message at a time (and AFAIRecall quaranteed to be in-order by ZMQ) but it's a good safety-net
         with self.webdriver_lock:
             if command[0:3] == 'wd:':
                 logaction = command
