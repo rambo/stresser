@@ -77,7 +77,7 @@ class worker(zmqdecorators.client):
 
     def mcp_command_callback(self, command, args_json="[]"):
         args = json.loads(args_json)
-        print "Got command: %s(%s)" % (command, repr(args))
+        print "Got command: %s(*%s)" % (command, repr(args))
         start = time.time()
         with self.webdriver_lock:
             if command[0:3] == 'wd:':
