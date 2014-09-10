@@ -87,7 +87,7 @@ class worker(zmqdecorators.client):
 
     def mcp_command_callback(self, command, args_json="[]"):
         args = json.loads(args_json)
-        print "Got command: %s(*%s)" % (command, repr(args))
+        print("Got command: %s(*%s)" % (command, repr(args)))
         try:
             # Check if we have a special handler for this command
             mymethod = getattr(self, command)
