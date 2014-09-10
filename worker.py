@@ -34,6 +34,7 @@ class worker(zmqdecorators.client):
         self.uuid = self.mcp_wrapper.uuid
         self.identity = self.mcp_wrapper.identity
 
+        print("Connecting to Webdriver %s" % REMOTE)
         self.webdriver = webdriver.Remote(desired_capabilities=CAPS, command_executor=REMOTE)
         atexit.register(self.webdriver.quit)
 

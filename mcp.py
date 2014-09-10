@@ -16,13 +16,24 @@ SIGNALS_PORT = 7071
 
 class mcp(zmqdecorators.service):
     workers = {} # Keyed by identity, value is last heartbeat time
+    signals_stream = None 
 
     def __init__(self):
         super(mcp, self).__init__(METHODS_SERVICE_NAME, service_port=METHODS_PORT)
 
+        # This is low-level ZMQStream, to be used only in special cases
+        self.signals_stream = zmqdecorators.server_tracker.get_by_name(SIGNALS_SERVICE_NAME, zmq.PUB).stream
+
         # periodically reap dead workers from our registry
         self.reaper_pcb = ioloop_mod.PeriodicCallback(self.reap_dead_workers, 1000)
         self.reaper_pcb.start()
+
+
+        test_pcb = ioloop_mod.PeriodicCallback(self.send_test_command, 500)
+        test_pcb.start()
+
+    def send_test_command(self):
+        self._send_command('EVERYONE', 'test', 'Lorem', 'ipsum', 'dolet')
 
     def reap_dead_workers(self):
         now = time.time()
@@ -36,6 +47,15 @@ class mcp(zmqdecorators.service):
         if reaped:
             print("Now have %d workers" % len(self.workers))
 
+    def _send_command(self, identity, command, *args):
+        """Send command to given worker (or 'EVERYONE'), uses PUB socket. This is the actual implementation (separate from the RPC method so we can call it directly as needed)"""
+        self.signals_stream.send_multipart([identity, command] + list(args))
+
+    @zmqdecorators.method()
+    def send_command(self, resp, identity, command, *args):
+        """Send command to given worker (or 'EVERYONE'), uses PUB socket. This is what gamemester calls to delegate commands"""
+        self._send_command(identity, command, *args)
+
     @zmqdecorators.signal(SIGNALS_SERVICE_NAME, SIGNALS_PORT)
     def worker_reaped(self, identity):
         """The gamemaster process is going to be interested in these signals"""
@@ -45,16 +65,6 @@ class mcp(zmqdecorators.service):
     def worker_added(self, identity):
         """The gamemaster process is going to be interested in these signals"""
         pass
-
-    @zmqdecorators.signal(SIGNALS_SERVICE_NAME, SIGNALS_PORT)
-    def testsignal(self, *args):
-        print("Sending testsignal")
-        pass
-
-    @zmqdecorators.method()
-    def emit_testsignal(self, resp, *args):
-        resp.send("ok") # Not required
-        self.testsignal("by request")
 
     @zmqdecorators.method()
     def register_worker(self, resp, identity, *args):
