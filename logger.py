@@ -41,12 +41,12 @@ class logger(zmqdecorators.service):
         """Initializes the database schema"""
         # The timestamps on these tables are basically denormalized just in case we wish to do optimized time based searches in them.
         # TODO: Rethink the schema
-        self.cursor.execute("CREATE TABLE log (clientid TEXT NOT NULL, time TIMESTAMP DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), url TEXT, action TEXT, httpstatus INTEGER, ttfb INTEGER, ttlb INTEGER, ttrdy INTEGER, walltime INTEGER, perfjson TEXT);")
+        self.cursor.execute("CREATE TABLE log (clientid TEXT NOT NULL, time TIMESTAMP DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), url TEXT, action TEXT, httpstatus INTEGER, walltime INTEGER, ttfb INTEGER, ttlb INTEGER, ttrdy INTEGER, perfjson TEXT);")
         self.connection.commit()
 
     @zmqdecorators.method()
-    def log(self, resp, timestamp, url, action, httpstatus, ttfb, ttlb, ttrdy, walltime, perfjson):
-        self.cursor.execute("INSERT INTO log (clientid, time, url, action, httpstatus, ttfb, ttlb, ttrdy, walltime, perfjson) VALUES (?,?,?,?,?,?,?,?,?,?);", (resp.client_id, timestamp, url, action, int(httpstatus), int(ttfb), int(ttlb), int(ttrdy), int(walltime), perfjson))
+    def log(self, resp, timestamp, url, action, httpstatus, walltime, ttfb, ttlb, ttrdy, perfjson):
+        self.cursor.execute("INSERT INTO log (clientid, time, url, action, httpstatus, walltime, ttfb, ttlb, ttrdy, perfjson) VALUES (?,?,?,?,?,?,?,?,?,?);", (resp.client_id, timestamp, url, action, int(httpstatus), int(walltime), int(ttfb), int(ttlb), int(ttrdy), perfjson))
         self.connection.commit()
 
 
