@@ -11,10 +11,11 @@ import time
 
 DEAD_WORKER_TIMEOUT = 15 # Seconds
 
-METHODS_SERVICE_NAME = 'fi.iki.rambo.stresser.mcp'
-SIGNALS_SERVICE_NAME = 'fi.iki.rambo.stresser.mcp.signals'
-METHODS_PORT = 7070
-SIGNALS_PORT = 7071
+from config import *
+METHODS_SERVICE_NAME = MCP_METHODS_SERVICE
+SIGNALS_SERVICE_NAME = MCP_SIGNALS_SERVICE
+METHODS_PORT = MCP_METHODS_PORT
+SIGNALS_PORT = MCP_SIGNALS_PORT
 
 class mcp(zmqdecorators.service):
     workers = {} # Keyed by identity, value is last heartbeat time

@@ -8,10 +8,7 @@ from zmq.eventloop import ioloop as ioloop_mod
 import zmqdecorators
 import threading
 
-# Bonjour resolving
-MCP_METHODS_SERVICE = 'fi.iki.rambo.stresser.mcp'
-MCP_SIGNALS_SERVICE = 'fi.iki.rambo.stresser.mcp.signals'
-LOG_METHODS_SERVICE = 'fi.iki.rambo.stresser.logger'
+from config import *
 
 
 class gamemaster(zmqdecorators.client):
@@ -43,9 +40,8 @@ if __name__ == "__main__":
     # Handle the (optional) command line arguments
     if len(sys.argv) >= 2:
         # Manual IP & port config
-        MCP_METHODS_SERVICE = (sys.argv[1], 7070)
-        MCP_SIGNALS_SERVICE = (sys.argv[1], 7071)
-        LOG_METHODS_SERVICE = (sys.argv[1], 7080)
+        MCP_METHODS_SERVICE = (sys.argv[1], MCP_METHODS_PORT)
+        MCP_SIGNALS_SERVICE = (sys.argv[1], MCP_SIGNALS_PORT)
 
     print("Connecting to MCP")
     mcp_wrapper = zmqdecorators.zmq_bonjour_connect_wrapper(zmq.DEALER, MCP_METHODS_SERVICE)

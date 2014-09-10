@@ -19,9 +19,10 @@ from zmq.eventloop import ioloop
 import zmqdecorators
 import zmq.utils.jsonapi as json
 
-SERVICE_NAME='fi.iki.rambo.stresser.logger'
-METHODS_PORT=7080
-SIGNALS_PORT=7081
+from config import *
+SERVICE_NAME = LOG_METHODS_SERVICE
+METHODS_PORT = LOG_METHODS_PORT
+SIGNALS_PORT = LOG_SIGNALS_PORT
 
 
 class logger(zmqdecorators.service):

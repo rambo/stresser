@@ -21,10 +21,8 @@ from threading import Lock
 REMOTE = 'http://127.0.0.1:4444/wd/hub'
 CAPS = DesiredCapabilities.FIREFOX
 
-# Bonjour resolving
-MCP_METHODS_SERVICE = 'fi.iki.rambo.stresser.mcp'
-MCP_SIGNALS_SERVICE = 'fi.iki.rambo.stresser.mcp.signals'
-LOG_METHODS_SERVICE = 'fi.iki.rambo.stresser.logger'
+from config import *
+
 
 class worker(zmqdecorators.client):
     webdriver = None
@@ -134,9 +132,9 @@ if __name__ == "__main__":
     # Handle the (optional) command line arguments
     if len(sys.argv) >= 2:
         # Manual IP & port config
-        MCP_METHODS_SERVICE = (sys.argv[1], 7070)
-        MCP_SIGNALS_SERVICE = (sys.argv[1], 7071)
-        LOG_METHODS_SERVICE = (sys.argv[1], 7080)
+        MCP_METHODS_SERVICE = (sys.argv[1], MCP_METHODS_PORT)
+        MCP_SIGNALS_SERVICE = (sys.argv[1], MCP_SIGNALS_PORT)
+        LOG_METHODS_SERVICE = (sys.argv[1], LOG_METHODS_PORT)
     if len(sys.argv) >= 3:
         # Alternate IP for the Selenium hub
         REMOTE='http://%s:4444/wd/hub' % sys.argv[2]
