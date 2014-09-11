@@ -53,4 +53,5 @@ Use the start_headless.sh script from the bin/ directory as normal user (not roo
 If you get "Unable to connect to host 127.0.0.1 on port 7055 after 45000 ms." Firefox has changed something yet again, downgrade it with
 
     apt-get install firefox=28.0+build2-0ubuntu2
+    apt-mark hold firefox
 
