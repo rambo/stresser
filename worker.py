@@ -17,6 +17,7 @@ from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
 from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
 from threading import Lock
 from exceptions import RuntimeError,KeyboardInterrupt,AttributeError
+from selenium.common.exceptions import WebDriverException
 
 REMOTE = 'http://127.0.0.1:4444/wd/hub'
 CAPS = DesiredCapabilities.FIREFOX
@@ -26,7 +27,7 @@ from config import *
 
 class worker(zmqdecorators.client):
     webdriver = None
-    previus_source = None
+    previous_source = None
 
     def __init__(self):
         super(worker, self).__init__()
@@ -70,15 +71,21 @@ class worker(zmqdecorators.client):
         with self.webdriver_lock:
             self.webdriver.title
 
-
     def page_changed(self):
         """Checks if the DOM(?) has changed since last check"""
         new_source = self.webdriver.page_source
         ret = True
-        if self.previus_source == new_source:
+        if self.previous_source == new_source:
             ret = False
-        self.previus_source = new_source
+        self.previous_source = new_source
         return ret
+
+    def screenshot(self):
+        """Dumps a screenshot file to current working directory. TODO: Make the directory configurable"""
+        with self.webdriver_lock:
+            fname = "%s_%s.png" % (self.identity, datetime.datetime.now().isoformat())
+            print("Saving %s" % fname)
+            self.webdriver.get_screenshot_as_file(fname)
 
     def DIE(self):
         """Kill a worker remotely"""
@@ -104,7 +111,12 @@ class worker(zmqdecorators.client):
             else:
                 logaction = "%s:%s" % (self.wd_last_return.id, command)
                 cmdmethod = getattr(self.wd_last_return, command)
-            self.wd_last_return = cmdmethod(*args)
+            try:
+                self.wd_last_return = cmdmethod(*args)
+            except WebDriverException,e:
+                # Ignore webdriver exceptions, just print them but do not die
+                print(e)
+                return
             walltime = time.time() - start
             walltime_ms = int(walltime*1000)
             # Log results if page was change or command was in certain list
@@ -115,9 +127,11 @@ class worker(zmqdecorators.client):
                 self.log(self.webdriver.current_url, logaction, args_json, 0, walltime_ms, *self.get_performance()) 
 
     def register_to_mcp(self):
+        """Registers to MCP, though the heartbeat will also take care of that if MCP has somehow lost track of the worker in between"""
         self.mcp_wrapper.call('register_worker', self.identity)
 
     def heartbeat_to_mcp(self):
+        """Sends heartbeat signal to MCP"""
         self.mcp_wrapper.call('worker_heatbeat', self.identity)
 
     def log(self, url, action, args_json, httpstatus, walltime, ttfb, ttlb, ttrdy, perfjson, timestamp=None):
