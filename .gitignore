@@ -1,3 +1,4 @@
+config.yml
 *.db
 .DS_Store
 ._*
