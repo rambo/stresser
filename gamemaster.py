@@ -23,8 +23,7 @@ class gamemaster(zmqdecorators.client):
         return zmqdecorators.call_sync(self.mcp_zmq_wrapper,  *args)
 
     def list_workers(self):
-        # I wonder about this response format though, it's tuple that has a list as the first element..
-        return json.loads(self.call('list_workers')[0][0]).keys()
+        return json.loads(self.call('list_workers')[0]).keys()
 
 
 
