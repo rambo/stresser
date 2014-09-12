@@ -1,4 +1,4 @@
 selenium>=2.26.0
-zmqdecorators>=0.7.1
+zmqdecorators>=0.7.2
 pyzmq>=14.0
 pyaml>=14.05.7
