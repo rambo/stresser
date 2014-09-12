@@ -1,1 +1,4 @@
-selenium==2.42.1
+selenium>=2.26.0
+zmqdecorators>=0.7.1
+pyzmq>=14.0
+pyaml>=14.05.7

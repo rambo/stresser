@@ -16,7 +16,7 @@ import selenium.common.exceptions as seleniumexceptions
 from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
 from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
 from threading import Lock
-from exceptions import RuntimeError,KeyboardInterrupt,AttributeError
+from exceptions import RuntimeError,KeyboardInterrupt,AttributeError,KeyError
 from selenium.common.exceptions import WebDriverException
 
 REMOTE = 'http://127.0.0.1:4444/wd/hub'
@@ -84,8 +84,13 @@ class worker(zmqdecorators.client):
         """Dumps a screenshot file to current working directory. TODO: Make the directory configurable"""
         with self.webdriver_lock:
             fname = "%s_%s.png" % (self.identity, datetime.datetime.now().isoformat())
+            try:
+                fname = os.path.join(YAML_CONFIG['worker']['screenshot_path'], fname)
+            except KeyError:
+                pass
             print("Saving %s" % fname)
-            self.webdriver.get_screenshot_as_file(fname)
+            if not self.webdriver.get_screenshot_as_file(fname):
+                print("FAILED to save %s" % fname)
 
     def DIE(self):
         """Kill a worker remotely"""

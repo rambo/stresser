@@ -1,0 +1,2 @@
+worker:
+    screenshot_path: '/mnt/screenshots'
