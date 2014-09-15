@@ -103,7 +103,12 @@ class worker(zmqdecorators.client):
         try:
             # Check if we have a special handler for this command
             mymethod = getattr(self, command)
-            return mymethod(*args)
+            try:
+                return mymethod(*args)
+            except WebDriverException,e:
+                # Ignore webdriver exceptions, just print them but do not die
+                print(e)
+                return
         except AttributeError:
             pass
         # Otherwise try to be smart
