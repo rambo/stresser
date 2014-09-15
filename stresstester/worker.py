@@ -119,7 +119,10 @@ class worker(zmqdecorators.client):
                 logaction = command
                 cmdmethod = getattr(self.webdriver, command[3:])
             else:
-                logaction = "%s:%s" % (self.wd_last_return.id, command)
+                if self.wd_last_return:
+                    logaction = "%s:%s" % (self.wd_last_return.id, command)
+                else:
+                    logaction = command
                 cmdmethod = getattr(self.wd_last_return, command)
             try:
                 self.wd_last_return = cmdmethod(*args)
