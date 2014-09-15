@@ -1,6 +1,7 @@
 # Selenium stuff
 
-Random selenium related scripts for testing misc things
+Scripts/helpers to run massively parallel Selenium tests (mostly having the workers doing the same thing instead of separate things, like simulating 
+masses of actual real users with real browsers running with full Javascript support)
 
 ## Install Selenium & friends
 
