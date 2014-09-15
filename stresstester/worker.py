@@ -69,7 +69,12 @@ class worker(zmqdecorators.client):
     def _webdriver_keepalive(self):
         """Just call driver.title to keep the webdriver connection alive"""
         with self.webdriver_lock:
-            self.webdriver.title
+            try:
+                self.webdriver.title
+            except WebDriverException,e:
+                print "Got exception: %s" % repr(e)
+                print("RE-Connecting to Webdriver %s" % REMOTE)
+                self.webdriver = webdriver.Remote(desired_capabilities=CAPS, command_executor=REMOTE)
 
     def page_changed(self):
         """Checks if the DOM(?) has changed since last check"""
@@ -107,7 +112,7 @@ class worker(zmqdecorators.client):
                 return mymethod(*args)
             except WebDriverException,e:
                 # Ignore webdriver exceptions, just print them but do not die
-                print(e)
+                print "Got exception: %s" % repr(e)
                 return
         except AttributeError:
             pass
@@ -128,7 +133,7 @@ class worker(zmqdecorators.client):
                 self.wd_last_return = cmdmethod(*args)
             except WebDriverException,e:
                 # Ignore webdriver exceptions, just print them but do not die
-                print(e)
+                print "Got exception: %s" % repr(e)
                 return
             walltime = time.time() - start
             walltime_ms = int(walltime*1000)
