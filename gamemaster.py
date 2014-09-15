@@ -40,6 +40,8 @@ class workerproxy(object):
         #print("Calling self.mcp_zmq_wrapper.call('send_command', %s, %s, %s)" % (self.identity, cmd, json.dumps(*args)))
         zmqdecorators.call_sync(self.mcp_zmq_wrapper, 'send_command', self.identity, cmd, json.dumps(args))
 
+
+
 if __name__ == "__main__":
     import sys,os
 

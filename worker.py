@@ -164,7 +164,7 @@ class worker(zmqdecorators.client):
 
 
 
-if __name__ == "__main__":
+def main():
     import sys,os
 
     # Handle the (optional) command line arguments
@@ -180,4 +180,9 @@ if __name__ == "__main__":
     instance = worker()
     print("Starting eventloop")
     instance.run()
+
+
+
+if __name__ == "__main__":
+    main()
 
