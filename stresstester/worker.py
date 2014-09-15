@@ -126,7 +126,7 @@ class worker(zmqdecorators.client):
             walltime_ms = int(walltime*1000)
             # Log results if page was change or command was in certain list
             if (   self.page_changed()
-                or command in ('wd:get', 'click')):
+                or command in ('wd:get', 'click', 'submit')):
                 # For HTTP status codes we need a proxy that will give that info to us (like browsermob-proxy or something)
                 # use milliseconds as walltime unit too
                 self.log(self.webdriver.current_url, logaction, args_json, 0, walltime_ms, *self.get_performance()) 
