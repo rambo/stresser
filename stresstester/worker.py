@@ -73,8 +73,10 @@ class worker(zmqdecorators.client):
                 self.webdriver.title
             except WebDriverException,e:
                 print "Got exception: %s" % repr(e)
+                self.wdkeepalive_pcb.stop()
                 print("RE-Connecting to Webdriver %s" % REMOTE)
                 self.webdriver = webdriver.Remote(desired_capabilities=CAPS, command_executor=REMOTE)
+                self.wdkeepalive_pcb.start()
 
     def page_changed(self):
         """Checks if the DOM(?) has changed since last check"""
