@@ -5,4 +5,4 @@ import worker, logger mcp as needed, check out gamemaster for how
 to make the MCP send commands to workers
 """
 
-import config
+from config import *

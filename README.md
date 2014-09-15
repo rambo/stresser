@@ -3,6 +3,9 @@
 Scripts/helpers to run massively parallel Selenium tests (mostly having the workers doing the same thing instead of separate things, like simulating 
 masses of actual real users with real browsers running with full Javascript support)
 
+Pro tip for thos wishing to work on the code <http://guide.python-distribute.org/pip.html#installing-from-a-vcs>
+
+
 ## Install Selenium & friends
 
 All of this supposes Ubuntu LTS (Trusty).
