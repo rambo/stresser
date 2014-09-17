@@ -17,7 +17,7 @@ from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
 from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
 from threading import Lock
 from exceptions import RuntimeError,KeyboardInterrupt,AttributeError,KeyError
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, NoSuchElementException
 
 REMOTE = 'http://127.0.0.1:4444/wd/hub'
 CAPS = DesiredCapabilities.FIREFOX
@@ -128,9 +128,10 @@ class worker(zmqdecorators.client):
             else:
                 if self.wd_last_return:
                     logaction = "%s:%s" % (self.wd_last_return.id, command)
+                    cmdmethod = getattr(self.wd_last_return, command)
                 else:
-                    logaction = command
-                cmdmethod = getattr(self.wd_last_return, command)
+                    print("ERROR: wd_last_return is None")
+                    return
             try:
                 self.wd_last_return = cmdmethod(*args)
             except WebDriverException,e:
