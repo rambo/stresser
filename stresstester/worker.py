@@ -18,6 +18,7 @@ from selenium.webdriver.support import expected_conditions as EC # available sin
 from threading import Lock
 from exceptions import RuntimeError,KeyboardInterrupt,AttributeError,KeyError
 from selenium.common.exceptions import WebDriverException, NoSuchElementException
+from selenium.webdriver.remote.webelement import WebElement
 
 REMOTE = 'http://127.0.0.1:4444/wd/hub'
 CAPS = DesiredCapabilities.FIREFOX
@@ -104,6 +105,32 @@ class worker(zmqdecorators.client):
         print("quitting...")
         self.quit()
 
+
+    def waitfor(self, timeout, ec_condition_name, by_condition_name, by_selector):
+        """Wrapper for WebDriverWait.until()"""
+        try:
+            by_class = getattr(By, by_condition_name)
+            ec_class = getattr(EC, ec_condition_name)
+        except AttributeError,e:
+            print "Got exception: %s" % repr(e)
+            return
+        with self.webdriver_lock:
+            try:
+                # Documentation claims this returns element, behaviour and source begs to differ...
+                self.wd_last_return = WebDriverWait(self.webdriver, timeout).until
+                (
+                    ec_class
+                    (
+                        (by_class,
+                        by_selector)
+                    )
+                ) 
+            except WebDriverException,e:
+                # Ignore webdriver exceptions, just print them but do not die
+                print "Got exception: %s" % repr(e)
+                return
+
+
     def mcp_command_callback(self, command, args_json="[]"):
         args = json.loads(args_json)
         print("Got command: %s(*%s)" % (command, repr(args)))
@@ -124,13 +151,21 @@ class worker(zmqdecorators.client):
         with self.webdriver_lock:
             if command[0:3] == 'wd:':
                 logaction = command
-                cmdmethod = getattr(self.webdriver, command[3:])
+                try:
+                    cmdmethod = getattr(self.webdriver, command[3:])
+                except AttributeError:
+                    print "Got exception: %s" % repr(e)
+                    return
             else:
-                if self.wd_last_return:
+                if isinstance(self.wd_last_return, WebElement):
                     logaction = "%s:%s" % (self.wd_last_return.id, command)
-                    cmdmethod = getattr(self.wd_last_return, command)
+                    try:
+                        cmdmethod = getattr(self.wd_last_return, command)
+                    except AttributeError:
+                        print "Got exception: %s" % repr(e)
+                        return
                 else:
-                    print("ERROR: wd_last_return is not")
+                    print("ERROR: wd_last_return is not WebElement")
                     return
             try:
                 self.wd_last_return = cmdmethod(*args)
