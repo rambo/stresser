@@ -130,7 +130,7 @@ class worker(zmqdecorators.client):
                     logaction = "%s:%s" % (self.wd_last_return.id, command)
                     cmdmethod = getattr(self.wd_last_return, command)
                 else:
-                    print("ERROR: wd_last_return is None")
+                    print("ERROR: wd_last_return is not")
                     return
             try:
                 self.wd_last_return = cmdmethod(*args)
