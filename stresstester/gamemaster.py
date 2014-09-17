@@ -12,12 +12,26 @@ from config import *
 
 
 class gamemaster(zmqdecorators.client):
+    worker_proxies = {}
+
     def __init__(self, mcp_zmq_wrapper):
         super(gamemaster, self).__init__()
         self.mcp_zmq_wrapper = mcp_zmq_wrapper
 
     def get_worker(self, identity):
-        return workerproxy(identity, self.mcp_zmq_wrapper)
+        if self.worker_proxies.has_key(identity):
+            return self.worker_proxies[identity]
+        self.worker_proxies[identity] = workerproxy(identity, self.mcp_zmq_wrapper)
+        return self.worker_proxies[identity]
+
+    def cmd_each(self, identities, command, *args, **kwargs):
+        exclude=[]
+        if kwargs.has_key('exclude'):
+            exclude = kwargs['exclude']
+        use_identities = set(identities).difference(set(exclude))
+        for id in use_identities:
+            w = self.get_worker(id)
+            w.cmd(command, *args)
 
     def call(self, *args):
         return zmqdecorators.call_sync(self.mcp_zmq_wrapper,  *args)
@@ -38,7 +52,7 @@ class workerproxy(object):
     def cmd(self, cmd, *args):
         """The command arguments must be JSON encoded to be transferred via ZMQ"""
         #print("Calling self.mcp_zmq_wrapper.call('send_command', %s, %s, %s)" % (self.identity, cmd, json.dumps(*args)))
-        zmqdecorators.call_sync(self.mcp_zmq_wrapper, 'send_command', self.identity, cmd, json.dumps(args))
+        zmqdecorators.call_sync(self.mcp_zmq_wrapper, 'send_command', str(self.identity), str(cmd), json.dumps(args))
 
 
 
