@@ -56,6 +56,7 @@ class worker(zmqdecorators.client):
         self.register_to_mcp()
 
         # Send heartbeats
+        # TODO: put this to a separate thread so webdriver operations that take a while do not block it
         self.heartbeat_pcb = ioloop_mod.PeriodicCallback(self.heartbeat_to_mcp, 1000)
         self.heartbeat_pcb.start()
 
@@ -91,6 +92,7 @@ class worker(zmqdecorators.client):
     def screenshot(self):
         """Dumps a screenshot file to current working directory. TODO: Make the directory configurable"""
         with self.webdriver_lock:
+            # TODO: make subdir for our identity and dump there, otherwise NFS directory locking with over hundred workers will be hell
             fname = "%s_%s.png" % (self.identity, datetime.datetime.now().isoformat())
             try:
                 fname = os.path.join(YAML_CONFIG['worker']['screenshot_path'], fname)
