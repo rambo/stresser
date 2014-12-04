@@ -27,7 +27,7 @@ Then [Google Chrome][chromeppa] (Chromium chromedriver simply does not work)
     
 Then FF, Xvfb and some python utilities
 
-    sudo apt-get install firefox firefox-locale-en Xvfb unzip wget python pip dbus-x11
+    sudo apt-get install firefox firefox-locale-en Xvfb unzip wget python python-pip dbus-x11
     pip install selenium
 
 Then [chromedriver][chromedriverurl]
@@ -58,4 +58,11 @@ If you get "Unable to connect to host 127.0.0.1 on port 7055 after 45000 ms." Fi
 
     apt-get install firefox=28.0+build2-0ubuntu2
     apt-mark hold firefox
+
+# ZMQ stuff
+
+Use ZMQ from packages
+
+    sudo apt-get install python-zmq
+    toggleglobalsitepackages # If using virtualenv-wrappers
 
