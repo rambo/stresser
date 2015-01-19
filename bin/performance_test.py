@@ -43,9 +43,10 @@ def getn(url):
         ttfb = perf[u'responseStart'] - perf[u'fetchStart']
         ttlb = perf[u'responseEnd'] - perf[u'fetchStart']
         ttrdy = perf[u'loadEventEnd'] - perf[u'fetchStart']
-        rendertime = perf[u'loadEventEnd'] - perf[u'responseEnd']
+        rendertime = perf[u'domContentLoadedEventEnd'] - perf[u'responseEnd']
+        loadtime =  perf[u'domContentLoadedEventStart'] - perf[u'fetchStart']
         timestamp = datetime.datetime.now()
-        print(""""%s";"%s";%d;%d;%d;%d;"%s";""" % (timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], url, ttfb, ttlb, ttrdy, rendertime, json.dumps(perf)))
+        print(""""%s";"%s";%d;%d;%d;%d;%d;"%s";""" % (timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], url, ttfb, ttlb, ttrdy, loadtime, rendertime, json.dumps(perf)))
         sys.stdout.flush()
 
     except seleniumexceptions.WebDriverException, e:
@@ -67,7 +68,7 @@ if __name__ == '__main__':
         num_runs = int(sys.argv[2])
 
     with open(sys.argv[1]) as urlsfile:
-        print(""""timestamp";"url";"ttfb";"ttlb";"ttrdy";"rendertime";"Full performance JSON";""");
+        print(""""timestamp";"url";"ttfb";"ttlb";"ttrdy";"loading time";"rendertime";"Full performance JSON";""");
         for x in range(num_runs):
             urlsfile.seek(0)
             for line in urlsfile:
