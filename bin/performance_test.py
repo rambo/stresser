@@ -26,7 +26,7 @@ def get_performance(driver):
 var timings = performance.timing || {};
 return timings;""")
 
-def getn(url, n):
+def getn(url):
     sys.stdout.flush()
     driver = None
     try:
@@ -36,19 +36,17 @@ def getn(url, n):
         )
         driver.implicitly_wait(30)
         driver.maximize_window()
+        b = time.time()
+        driver.get(url)
+        took = time.time() - b
+        perf = get_performance(driver)
+        ttfb = perf[u'responseStart'] - perf[u'fetchStart']
+        ttlb = perf[u'responseEnd'] - perf[u'fetchStart']
+        ttrdy = perf[u'loadEventEnd'] - perf[u'fetchStart']
+        rendertime = perf[u'loadEventEnd'] - perf[u'responseEnd']
+        timestamp = datetime.datetime.now()
+        print(""""%s";"%s";%d;%d;%d;%d;"%s";""" % (timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], url, ttfb, ttlb, ttrdy, rendertime, json.dumps(perf)))
         sys.stdout.flush()
-        for i in range(n):
-            b = time.time()
-            driver.get(url)
-            took = time.time() - b
-            perf = get_performance(driver)
-            ttfb = perf[u'responseStart'] - perf[u'fetchStart']
-            ttlb = perf[u'responseEnd'] - perf[u'fetchStart']
-            ttrdy = perf[u'loadEventEnd'] - perf[u'fetchStart']
-            rendertime = perf[u'loadEventEnd'] - perf[u'responseEnd']
-            timestamp = datetime.datetime.now()
-            print(""""%s";"%s";%d;%d;%d;%d;"%s";""" % (timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], url, ttfb, ttlb, ttrdy, rendertime, json.dumps(perf)))
-            sys.stdout.flush()
 
     except seleniumexceptions.WebDriverException, e:
         print("%f: EXCEPTION: %s" % (datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:23], e), file=sys.stderr)
@@ -61,13 +59,20 @@ def getn(url, n):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("usage performance_test.py file_with_urls\n");
+        print("usage performance_test.py file_with_urls [num_runs]\n");
         sys.exit(1)
+
+    num_runs = 1
+    if len(sys.argv) >= 3:
+        num_runs = int(sys.argv[2])
+
     with open(sys.argv[1]) as urlsfile:
         print(""""timestamp";"url";"ttfb";"ttlb";"ttrdy";"rendertime";"Full performance JSON";""");
-        for line in urlsfile:
-            url = line.strip()
-            if not url:
-                continue
-            getn(url, 1)
+        for x in range(num_runs):
+            urlsfile.seek(0)
+            for line in urlsfile:
+                url = line.strip()
+                if not url:
+                    continue
+                getn(url)
 
