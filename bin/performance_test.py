@@ -22,22 +22,18 @@ CAPS=DesiredCapabilities.FIREFOX
 
 # from http://stackoverflow.com/questions/11360854/right-way-to-test-page-load-time-in-selenium
 def get_performance(driver):
-    return driver.execute_script("""var performance = window.performance || {};
+    return DRIVER.execute_script("""var performance = window.performance || {};
 var timings = performance.timing || {};
 return timings;""")
+
+DRIVER = None
 
 def getn(url):
     sys.stdout.flush()
     driver = None
     try:
-        driver = webdriver.Remote(
-                        desired_capabilities=CAPS,
-                        command_executor=REMOTE
-        )
-        driver.implicitly_wait(30)
-        driver.maximize_window()
         b = time.time()
-        driver.get(url)
+        DRIVER.get(url)
         took = time.time() - b
         perf = get_performance(driver)
         ttfb = perf[u'responseStart'] - perf[u'fetchStart']
@@ -54,8 +50,6 @@ def getn(url):
         sys.stdout.flush()
     finally:
         sys.stdout.flush()
-        if driver:
-            driver.quit()
 
 
 if __name__ == '__main__':
@@ -66,6 +60,13 @@ if __name__ == '__main__':
     num_runs = 1
     if len(sys.argv) >= 3:
         num_runs = int(sys.argv[2])
+
+    DRIVER = webdriver.Remote(
+                    desired_capabilities=CAPS,
+                    command_executor=REMOTE
+    )
+    DRIVER.implicitly_wait(30)
+    DRIVER.maximize_window()
 
     with open(sys.argv[1]) as urlsfile:
         print(""""timestamp";"url";"ttfb";"ttlb";"ttrdy";"loading time";"rendertime";"Full performance JSON";""");
