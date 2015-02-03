@@ -66,7 +66,8 @@ if __name__ == '__main__':
                     command_executor=REMOTE
     )
     DRIVER.implicitly_wait(30)
-    DRIVER.maximize_window()
+    #DRIVER.maximize_window()
+    DRIVER.set_window_size(1280, 1024)
 
     with open(sys.argv[1]) as urlsfile:
         print(""""timestamp";"url";"ttfb";"ttlb";"ttrdy";"loading time";"rendertime";"Full performance JSON";""");
