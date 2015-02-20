@@ -13,6 +13,10 @@ import time, datetime
 import json
 import multiprocessing
 import sys,os
+try:
+    import urlparse
+except ImportError,e:
+    import urllib.parse as urlparse
 
 #REMOTE='http://10.211.55.14:4444/wd/hub'
 REMOTE='http://127.0.0.1:4444/wd/hub'
@@ -46,7 +50,7 @@ def getn(url):
         sys.stdout.flush()
 
     except seleniumexceptions.WebDriverException, e:
-        print("%f: EXCEPTION: %s" % (datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:23], e), file=sys.stderr)
+        print("%s: EXCEPTION: %s" % (datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:23], e), file=sys.stderr)
         sys.stdout.flush()
     finally:
         sys.stdout.flush()
@@ -68,6 +72,15 @@ if __name__ == '__main__':
     DRIVER.implicitly_wait(30)
     #DRIVER.maximize_window()
     DRIVER.set_window_size(1280, 1024)
+    profile_url = os.environ.get('XDEBUG_PROFILE')
+    if profile_url:
+        DRIVER.get(profile_url)
+        DRIVER.add_cookie({
+            'name': 'XDEBUG_PROFILE',
+            'value': '1',
+            'paht': '/',
+            'domain': urlparse.urlparse(profile_url).netloc
+        })
 
     with open(sys.argv[1]) as urlsfile:
         print(""""timestamp";"url";"ttfb";"ttlb";"ttrdy";"loading time";"rendertime";"Full performance JSON";""");
