@@ -29,8 +29,10 @@ class jobmanager:
 
 class fetcher:
     """This will take a pad URL (under ETHERPAD_BASE) and dump it as HTML, then follow any links to same etherpad server and dump those as well"""
+
     def __init__(self, base, queuemanager):
         self.BASE_RE = re.compile('^%s.+/$' % base)
+        self.css_selector = None
         
         # This is just a reference so we can push jobs to the queue
         self.queuemanager = queuemanager
@@ -47,19 +49,32 @@ class fetcher:
         self.queuemanager.fetched_urls.append(url)
 
         soup = BeautifulSoup(fp)
-        recurse_links = soup.find_all('a', href=self.BASE_RE)
-        for tag in recurse_links:
-            # Doublecheck the url is sane pad
-            new_pad_url = tag['href']
-            # Add to processing list
-            self.queuemanager.add_to_queue(new_pad_url)
+        if not self.css_selector:
+            recurse_links = soup.find_all('a', href=self.BASE_RE)
+            for tag in recurse_links:
+                new_page_url = tag['href']
+                # Add to processing list
+                self.queuemanager.add_to_queue(new_page_url)
+            return
+
+        for elem in soup.select(self.css_selector):
+            recurse_links = elem.find_all('a', href=self.BASE_RE)
+            for tag in recurse_links:
+                # Doublecheck the url is sane pad
+                new_page_url = tag['href']
+                # Add to processing list
+                self.queuemanager.add_to_queue(new_page_url)
+
+
 
 if __name__ == '__main__':
     import os,sys
     if len(sys.argv) < 2:
-        print("Usage: scout base url\n")
+        print("Usage: scout base url [css_selector]\n")
         sys.exit(1)
     jm = jobmanager(sys.argv[1])
+    if len(sys.argv) >= 3:
+        jm.fetcher.css_selector = sys.argv[2]
     jm.run()
     print("\n=== Succesfully fetched URLS ===")
     for url in jm.fetched_urls:
