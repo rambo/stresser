@@ -65,10 +65,24 @@ if __name__ == '__main__':
     if len(sys.argv) >= 3:
         num_runs = int(sys.argv[2])
 
-    DRIVER = webdriver.Remote(
-                    desired_capabilities=CAPS,
-                    command_executor=REMOTE
-    )
+    socks_proxy = os.environ.get('SOCKS_PROXY')
+    if not socks_proxy:
+        DRIVER = webdriver.Remote(
+            desired_capabilities=CAPS,
+            command_executor=REMOTE
+        )
+    elif CAPS == DesiredCapabilities.FIREFOX:
+        ffprofile = webdriver.FirefoxProfile()
+        ffprofile.set_preference('network.proxy.type', 1)
+        ffprofile.set_preference('network.proxy.socks', socks_proxy.split(':')[0])
+        ffprofile.set_preference('network.proxy.socks_port', int(socks_proxy.split(':')[1]))
+        DRIVER = webdriver.Remote(
+            desired_capabilities=CAPS,
+            browser_profile = ffprofile,
+            command_executor=REMOTE
+        )
+    else:
+        raise Exception("Do not know how to set proxy for %s" % CAPS)
     DRIVER.implicitly_wait(30)
     #DRIVER.maximize_window()
     DRIVER.set_window_size(1280, 1024)
