@@ -6,6 +6,7 @@ from __future__ import print_function
 import re, urllib2
 from bs4 import BeautifulSoup
 
+# TODO: Make concurrent, also on ctrl-c print the urls seen so far
 
 class jobmanager:
     def __init__(self, entry_url):
