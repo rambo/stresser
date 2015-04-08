@@ -46,7 +46,8 @@ class fetcher:
             print("Failed to fetchs %s: %s" % (url, e))
             return False
 
-        self.queuemanager.fetched_urls.append(url)
+        # Use the final URL
+        self.queuemanager.fetched_urls.append(fp.geturl())
 
         soup = BeautifulSoup(fp)
         if not self.css_selector:
@@ -60,7 +61,6 @@ class fetcher:
         for elem in soup.select(self.css_selector):
             recurse_links = elem.find_all('a', href=self.BASE_RE)
             for tag in recurse_links:
-                # Doublecheck the url is sane pad
                 new_page_url = tag['href']
                 # Add to processing list
                 self.queuemanager.add_to_queue(new_page_url)
@@ -72,10 +72,31 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Usage: scout base url [css_selector]\n")
         sys.exit(1)
-    jm = jobmanager(sys.argv[1])
-    if len(sys.argv) >= 3:
-        jm.fetcher.css_selector = sys.argv[2]
-    jm.run()
+
+
+    if len(sys.argv) >= 4:
+        all_urls = []
+        with open(sys.argv[3]) as f:
+            for urlb in f:
+                url = urlb.strip()
+                # Skip empty ones
+                if not url:
+                    continue
+                # Also skip "commented out" lines
+                if url.startswith('#'):
+                    continue
+                jm = jobmanager(url)
+                if len(sys.argv) >= 3:
+                    jm.fetcher.css_selector = sys.argv[2]
+                jm.run()
+                all_urls += jm.fetched_urls
+    else:
+        jm = jobmanager(sys.argv[1])
+        if len(sys.argv) >= 3:
+            jm.fetcher.css_selector = sys.argv[2]
+        jm.run()
+        all_urls = jm.fetched_urls
+
     print("\n=== Succesfully fetched URLS ===")
-    for url in jm.fetched_urls:
+    for url in all_urls:
         print(url)
