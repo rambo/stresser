@@ -6,9 +6,7 @@ from __future__ import print_function
 import re, urllib2
 from bs4 import BeautifulSoup
 
-# TODO: Make concurrent, also on ctrl-c print the urls seen so far
-
-class jobmanager:
+class jobmanager(object):
     def __init__(self, entry_url):
         self.job_queue = [entry_url, ]
         self.seen_urls = { entry_url: True }
@@ -28,7 +26,7 @@ class jobmanager:
             url = self.job_queue.pop(0)
             self.fetcher.fetch(url)
 
-class fetcher:
+class fetcher(object):
     """This will take a pad URL (under ETHERPAD_BASE) and dump it as HTML, then follow any links to same etherpad server and dump those as well"""
 
     def __init__(self, base, queuemanager):
@@ -71,33 +69,14 @@ class fetcher:
 if __name__ == '__main__':
     import os,sys
     if len(sys.argv) < 2:
-        print("Usage: scout base url [css_selector]\n")
+        print("Usage: scout base_url [css_selector]\n")
         sys.exit(1)
 
-
-    if len(sys.argv) >= 4:
-        all_urls = []
-        with open(sys.argv[3]) as f:
-            for urlb in f:
-                url = urlb.strip()
-                # Skip empty ones
-                if not url:
-                    continue
-                # Also skip "commented out" lines
-                if url.startswith('#'):
-                    continue
-                jm = jobmanager(url)
-                if len(sys.argv) >= 3:
-                    jm.fetcher.css_selector = sys.argv[2]
-                jm.run()
-                all_urls += jm.fetched_urls
-    else:
-        jm = jobmanager(sys.argv[1])
-        if len(sys.argv) >= 3:
-            jm.fetcher.css_selector = sys.argv[2]
-        jm.run()
-        all_urls = jm.fetched_urls
+    jm = jobmanager(sys.argv[1])
+    if len(sys.argv) >= 3:
+        jm.fetcher.css_selector = sys.argv[2]
+    jm.run()
 
     print("\n=== Succesfully fetched URLS ===")
-    for url in all_urls:
+    for url in jm.fetched_urls:
         print(url)
