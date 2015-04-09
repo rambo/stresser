@@ -47,3 +47,11 @@ if __name__ == '__main__':
     print("\n=== Succesfully fetched URLS ===")
     for url in all_urls:
         print(url)
+
+    print("====\nTrying to clean-up, you can ctrl-c now if this does not exit")
+    for p in processes:
+        # If process did not join after timeout, kill it.
+        if p.is_alive():
+            p.terminate()
+            p.join(5)
+
