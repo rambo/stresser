@@ -44,8 +44,8 @@ And finally Selenium itself
 
     mkdir -p /opt/selenium/server/
     cd /opt/selenium/server/
-    wget http://selenium-release.storage.googleapis.com/2.42/selenium-server-standalone-2.42.2.jar
-    ln -s selenium-server-standalone-2.42.2.jar selenium-server-standalone-current.jar
+    wget http://selenium-release.storage.googleapis.com/2.47/selenium-server-standalone-2.47.1.jar
+    ln -s selenium-server-standalone-2.47.1.jar selenium-server-standalone-current.jar
 
 
 ## Start Selenium
@@ -56,7 +56,7 @@ Use the start_headless.sh script from the bin/ directory as normal user (not roo
 
 If you get "Unable to connect to host 127.0.0.1 on port 7055 after 45000 ms." Firefox has changed something yet again, downgrade it with
 
-    apt-get install firefox=28.0+build2-0ubuntu2
+    apt-get install firefox=41.0+build3-0ubuntu0.14.04.1
     apt-mark hold firefox
 
 # ZMQ stuff
