@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC # available sin
 import time, datetime
 import json
 import multiprocessing
-import sys,os
+import sys,os,atexit
 try:
     import urlparse
 except ImportError,e:
@@ -83,6 +83,7 @@ if __name__ == '__main__':
         )
     else:
         raise Exception("Do not know how to set proxy for %s" % CAPS)
+    atexit.register(DRIVER.quit)
     DRIVER.implicitly_wait(30)
     #DRIVER.maximize_window()
     DRIVER.set_window_size(1280, 1024)
@@ -102,9 +103,11 @@ if __name__ == '__main__':
             urlsfile.seek(0)
             for line in urlsfile:
                 url = line.strip()
-                if not url:
+                if (   not url
+                    or url.startswith('#')):
                     continue
                 getn(url)
 
-    DRIVER.quit()
+    # atexit will handle this
+    #DRIVER.quit()
 
