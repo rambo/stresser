@@ -3,4 +3,4 @@ config.yml
 .DS_Store
 ._*
 *.pyc
-
+bin/*login.py
