@@ -89,10 +89,20 @@ if __name__ == '__main__':
         )
     else:
         raise Exception("Do not know how to set proxy for %s" % CAPS)
+
     atexit.register(DRIVER.quit)
     DRIVER.implicitly_wait(30)
     #DRIVER.maximize_window()
     DRIVER.set_window_size(1280, 1024)
+
+    # If we have login_handler_module specified, use it
+    if len(sys.argv) >= 4:
+        import importlib
+        m = importlib.import_module(sys.argv[3])
+        h = m.loginhandler(DRIVER)
+        h.login()
+
+    # Check if we want to set the xdebug profiling cookie
     profile_url = os.environ.get('XDEBUG_PROFILE')
     if profile_url:
         DRIVER.get(profile_url)
@@ -103,13 +113,7 @@ if __name__ == '__main__':
             'domain': urlparse.urlparse(profile_url).netloc
         })
 
-    # If we have login_handler_module specified, use it
-    if len(sys.argv) >= 4:
-        import importlib
-        m = importlib.import_module(sys.argv[3])
-        h = m.loginhandler(DRIVER)
-        h.login()
-
+    # Go trhough the urls file line by line
     with open(sys.argv[1]) as urlsfile:
         print(""""timestamp";"url";"ttfb";"ttlb";"ttrdy";"loading time";"rendertime";"Full performance JSON";""");
         for x in range(num_runs):
