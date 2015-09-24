@@ -40,13 +40,19 @@ def getn(url):
         DRIVER.get(url)
         took = time.time() - b
         perf = get_performance(driver)
-        ttfb = perf[u'responseStart'] - perf[u'fetchStart']
-        ttlb = perf[u'responseEnd'] - perf[u'fetchStart']
-        ttrdy = perf[u'loadEventEnd'] - perf[u'fetchStart']
+        # This doesn't seem to affect the weird result for ttrdy the first time we hit the redirects
+        if perf[u'redirectEnd']:
+            perf_start_ts = perf[u'redirectEnd']
+        else:
+            perf_start_ts = perf[u'fetchStart']
+        ttfb = perf[u'responseStart'] - perf_start_ts
+        ttlb = perf[u'responseEnd'] - perf_start_ts
+        ttrdy = perf[u'loadEventEnd'] - perf_start_ts
         rendertime = perf[u'domContentLoadedEventEnd'] - perf[u'responseEnd']
-        loadtime =  perf[u'domContentLoadedEventStart'] - perf[u'fetchStart']
+        loadtime =  perf[u'domContentLoadedEventStart'] - perf_start_ts
         timestamp = datetime.datetime.now()
         print(""""%s";"%s";%d;%d;%d;%d;%d;"%s";""" % (timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:23], url, ttfb, ttlb, ttrdy, loadtime, rendertime, json.dumps(perf)))
+        #DRIVER.get_screenshot_as_file("%s.png" % (timestamp.strftime("%Y%m%d_%H%M%S_%f")[:23]))
         sys.stdout.flush()
 
     except seleniumexceptions.WebDriverException, e:
@@ -58,7 +64,7 @@ def getn(url):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("usage performance_test.py file_with_urls [num_runs]\n");
+        print("usage performance_test.py file_with_urls [num_runs] [login_handler_module]\n");
         sys.exit(1)
 
     num_runs = 1
@@ -96,6 +102,13 @@ if __name__ == '__main__':
             'paht': '/',
             'domain': urlparse.urlparse(profile_url).netloc
         })
+
+    # If we have login_handler_module specified, use it
+    if len(sys.argv) >= 4:
+        import importlib
+        m = importlib.import_module(sys.argv[3])
+        h = m.loginhandler(DRIVER)
+        h.login()
 
     with open(sys.argv[1]) as urlsfile:
         print(""""timestamp";"url";"ttfb";"ttlb";"ttrdy";"loading time";"rendertime";"Full performance JSON";""");
