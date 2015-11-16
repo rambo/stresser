@@ -34,19 +34,20 @@ Then [chromedriver][chromedriverurl]
 
     mkdir -p /opt/chromedriver/
     cd /opt/chromedriver/
-    wget http://chromedriver.storage.googleapis.com/2.10/chromedriver_linux64.zip
+    wget http://chromedriver.storage.googleapis.com/2.20/chromedriver_linux64.zip
     unzip chromedriver_linux64.zip
     chmod a+x -R /opt/chromedriver/
 
 [chromedriverurl]: http://chromedriver.storage.googleapis.com/index.html 
 
-And finally Selenium itself
+And finally [Selenium][seleniumurl] itself
 
     mkdir -p /opt/selenium/server/
     cd /opt/selenium/server/
-    wget http://selenium-release.storage.googleapis.com/2.47/selenium-server-standalone-2.47.1.jar
-    ln -s selenium-server-standalone-2.47.1.jar selenium-server-standalone-current.jar
+    wget http://selenium-release.storage.googleapis.com/2.48/selenium-server-standalone-2.48.2.jar
+    ln -s selenium-server-standalone-2.48.2.jar selenium-server-standalone-current.jar
 
+[seleniumurl]: http://selenium-release.storage.googleapis.com/index.html
 
 ## Start Selenium
 
@@ -56,8 +57,8 @@ Use the start_headless.sh script from the bin/ directory as normal user (not roo
 
 If you get "Unable to connect to host 127.0.0.1 on port 7055 after 45000 ms." Firefox has changed something yet again, downgrade it with
 
-    apt-get install firefox=41.0+build3-0ubuntu0.14.04.1
-    apt-mark hold firefox
+    apt-get install firefox=42.0+build2-0ubuntu0.14.04.1
+    apt-mark hold firefox # apt-mark unhold firefox
 
 # ZMQ stuff
 
